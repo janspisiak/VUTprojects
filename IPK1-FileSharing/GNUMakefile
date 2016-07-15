@@ -1,0 +1,58 @@
+# Variables
+SERVER_BIN = server
+CLIENT_BIN = client
+
+CC = $(shell command -v g++48 >/dev/null 2>&1 && { echo "g++48"; true; } || echo "g++")
+RM = rm -rf
+TAR = tar -czf
+
+CFLAGS = -Wall -Wextra -Wno-unused-function -c -std=c++11
+CFLAGS_RELEASE = -O3 -s -DSLOG_MAX_LEVEL=Logger::Severity::Notice
+CFLAGS_DEBUG = -O0 -g -DDEBUG
+
+SRC_FILES = $(wildcard *.cpp)
+HEADER_FILES = $(wildcard *.h)
+
+LFLAGS = -static-libstdc++ -pthread
+
+SERVER_SPEC_FILES = server.cpp Server.cpp
+CLIENT_SPEC_FILES = client.cpp Client.cpp
+
+SERVER_SRC_FILES = $(filter-out $(CLIENT_SPEC_FILES), $(SRC_FILES))
+CLIENT_SRC_FILES = $(filter-out $(SERVER_SPEC_FILES), $(SRC_FILES))
+
+SERVER_OBJ_FILES = $(patsubst %.cpp, %.o, $(SERVER_SRC_FILES))
+CLIENT_OBJ_FILES = $(patsubst %.cpp, %.o, $(CLIENT_SRC_FILES))
+
+TAR_FILE = xspisi03.tar.gz
+PACKED_FILES = $(SRC_FILES) $(HEADER_FILES) Makefile GNUMakefile
+
+# Targets
+release: CFLAGS += $(CFLAGS_RELEASE)
+release: build
+
+debug: CFLAGS += $(CFLAGS_DEBUG)
+debug: build
+
+profile: CFLAGS += $(CFLAGS_PROFILE)
+profile: LFLAGS += $(LFLAGS_PROFILE)
+profile: build
+
+build: server client
+
+server: $(SERVER_OBJ_FILES)
+	$(CC) $^ -o $(SERVER_BIN) $(LFLAGS)
+
+client: $(CLIENT_OBJ_FILES)
+	$(CC) $^ -o $(CLIENT_BIN) $(LFLAGS)	
+
+%.o: %.cpp
+	$(CC) $(CFLAGS) -o $@ $<
+
+pack:
+	$(TAR) $(TAR_FILE) $(PACKED_FILES)
+
+clean:
+	$(RM) $(CLIENT_BIN) $(SERVER_BIN) $(SERVER_OBJ_FILES) $(CLIENT_OBJ_FILES) $(TAR_FILE)
+
+.PHONY: release debug build clean pack

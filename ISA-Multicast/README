@@ -1,0 +1,21 @@
+m2u: mutlicast to unicast proxy
+Author: Jan Spisiak (xspisi03@stud.fit.vutbr.cz)
+
+Usage:
+	m2u -h MHOST -g UHOST
+	m2u -?
+
+Files:
+	m2u.c
+	Makefile
+	README
+	manual.pdf
+
+Desc:
+	Run program specifying multicast address with -h and unicast host with -g.
+	Program logs to stderr and warns if the unicast host isn't listening on 
+	port specified in UHOST.
+	MHOST and UHOST can be following:
+	HOSTNAME:PORT
+	IPV4:PORT
+	[IPV6]:PORT
